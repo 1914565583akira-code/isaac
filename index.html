@@ -1,0 +1,940 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+  <title>以撒的结合：忏悔 · 解锁清单</title>
+  <style>
+    :root {
+      --bg-color: #0d0d11;
+      --container-bg: #141419;
+      --card-bg: #1d1d22;
+      --text-color: #e1e1e6;
+      --priority-bg: #52161a;
+      --priority-border: #ff4757;
+      --priority-text: #ffeef0;
+      --normal-bg: #423500;
+      --normal-border: #ffc107;
+      --normal-text: #fffbe6;
+      --checked-bg: #222228;
+      --checked-text: #6b6b75;
+      --checked-border: #44444c;
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      padding: 20px 14px;
+      display: flex;
+      justify-content: center;
+    }
+    .container {
+      width: 100%;
+      max-width: 850px;
+    }
+    .top-credit {
+      text-align: center;
+      font-size: 12px;
+      color: #6b6b75;
+      margin-bottom: 8px;
+      letter-spacing: 0.3px;
+      line-height: 1.5;
+    }
+    .top-credit span {
+      color: #8e8e93;
+      font-weight: 500;
+    }
+    header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    h1 {
+      font-size: 26px;
+      margin-bottom: 6px;
+      color: #ffffff;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+    }
+    .subtitle {
+      font-size: 14px;
+      color: #8e8e93;
+      margin-bottom: 10px;
+    }
+    .dashboard {
+      position: sticky;
+      top: 10px;
+      z-index: 100;
+      background-color: var(--container-bg);
+      border: 1px solid #242428;
+      border-radius: 14px;
+      padding: 16px;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6);
+      margin-bottom: 25px;
+    }
+    .progress-container {
+      margin-bottom: 14px;
+    }
+    .progress-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+    .progress-bar {
+      background-color: #1e1e24;
+      border-radius: 20px;
+      height: 18px;
+      width: 100%;
+      overflow: hidden;
+      position: relative;
+      border: 1px solid #2e2e36;
+    }
+    .progress-fill {
+      background: linear-gradient(90deg, #10b981, #059669);
+      height: 100%;
+      width: 0%;
+      transition: width 0.3s ease;
+      border-radius: 20px;
+    }
+    .controls-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .tabs {
+      display: flex;
+      background-color: #222227;
+      padding: 4px;
+      border-radius: 8px;
+      border: 1px solid #2e2e35;
+    }
+    .tab-btn {
+      background: none;
+      border: none;
+      color: #8e8e93;
+      padding: 6px 18px;
+      font-size: 14px;
+      font-weight: 600;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .tab-btn.active {
+      background-color: #3a3a42;
+      color: #ffffff;
+    }
+    .filters {
+      display: flex;
+      gap: 6px;
+    }
+    .filter-btn {
+      background-color: #1a1a1f;
+      border: 1px solid #2e2e35;
+      color: #c7c7cc;
+      padding: 6px 14px;
+      font-size: 13px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .filter-btn.active {
+      background-color: #0284c7;
+      border-color: #0ea5e9;
+      color: white;
+    }
+    .legend {
+      display: flex;
+      gap: 16px;
+      font-size: 12px;
+      background-color: #1a1a1f;
+      padding: 8px 12px;
+      border-radius: 6px;
+      margin-top: 12px;
+      border: 1px solid #242428;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .legend-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 3px;
+    }
+    .character-card {
+      background-color: var(--container-bg);
+      border: 1px solid #242428;
+      border-radius: 14px;
+      padding: 16px;
+      margin-bottom: 22px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    }
+    .character-title {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 14px;
+      color: #ffffff;
+      border-bottom: 1px solid #242428;
+      padding-bottom: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .char-progress-tag {
+      font-size: 12px;
+      background-color: #222227;
+      color: #8e8e93;
+      padding: 2px 10px;
+      border-radius: 20px;
+      font-weight: 500;
+    }
+    .list-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .item-row {
+      display: flex;
+      align-items: center;
+      padding: 12px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: transform 0.1s ease, box-shadow 0.1s ease;
+      user-select: none;
+      border-left: 5px solid transparent;
+    }
+    .item-row:hover {
+      transform: translateX(3px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    }
+    .item-row.priority-row {
+      background-color: var(--priority-bg);
+      border-left-color: var(--priority-border);
+      color: var(--priority-text);
+    }
+    .item-row.normal-row {
+      background-color: var(--normal-bg);
+      border-left-color: var(--normal-border);
+      color: var(--normal-text);
+    }
+    .item-row.checked-row {
+      background-color: var(--checked-bg) !important;
+      border-left-color: var(--checked-border) !important;
+      color: var(--checked-text) !important;
+      opacity: 0.45;
+    }
+    .item-row.checked-row .unlock-name {
+      text-decoration: line-through;
+    }
+    .item-row.checked-row .tag {
+      background-color: #2e2e35 !important;
+      color: #6b6b75 !important;
+    }
+    .checkbox-wrapper {
+      margin-right: 14px;
+      display: flex;
+      align-items: center;
+    }
+    input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      accent-color: #10b981;
+      cursor: pointer;
+      pointer-events: none;
+    }
+    .row-content {
+      display: flex;
+      flex-grow: 1;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .route-boss {
+      font-weight: 700;
+      font-size: 14px;
+    }
+    .arrow-separator {
+      opacity: 0.5;
+      margin: 0 6px;
+    }
+    .unlock-name {
+      font-size: 14px;
+      font-weight: 500;
+    }
+    .tags-wrapper {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+    .tag {
+      font-size: 11px;
+      font-weight: bold;
+      padding: 2px 8px;
+      border-radius: 4px;
+    }
+    .tag-priority {
+      background-color: #ff4757;
+      color: white;
+    }
+    .tag-recommend {
+      background-color: #eab308;
+      color: #451a03;
+    }
+    footer {
+      margin-top: 30px;
+      text-align: center;
+    }
+    .reset-btn {
+      background-color: #2d1214;
+      color: #fca5a5;
+      border: 1px solid #5c1e22;
+      padding: 14px 24px;
+      font-size: 14px;
+      font-weight: 600;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      width: 100%;
+    }
+    .reset-btn:hover {
+      background-color: #5c1e22;
+      color: white;
+    }
+    .no-items-message {
+      text-align: center;
+      padding: 40px;
+      color: #71717a;
+      font-size: 14px;
+    }
+    @media (max-width: 600px) {
+      body {
+        padding: 10px 6px;
+      }
+      .controls-row {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+      }
+      .tabs,
+      .filters {
+        justify-content: center;
+      }
+      .item-row {
+        padding: 10px 12px;
+      }
+      .route-boss,
+      .unlock-name {
+        font-size: 13px;
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="top-credit">
+    由 <span>Gemini</span>, <span>DeepSeek</span>, <span>Claude</span> 联合创作 · 制作：<span>Akira</span>
+    <div class="subtitle">道具推荐信息来源：B站BV11pj7zEEHL</div>
+
+  </div>
+  <header>
+    <h1>以撒的结合：忏悔 - 通关解锁全角色清单</h1>
+    <div class="subtitle">优先条目永远置顶 · 普通模式与堕化模式高价值成就追踪</div>
+  </header>
+
+  <div class="dashboard">
+    <div class="progress-container">
+      <div class="progress-label">
+        <span id="groupProgressLabel">总完成进度 (普通角色)</span>
+        <span id="progressText">0 / 0 (0%)</span>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill" id="progressFill" style="width: 0%;"></div>
+      </div>
+    </div>
+    <div class="controls-row">
+      <div class="tabs">
+        <button class="tab-btn active" id="tab-normal" onclick="switchGroup('normal')">普通角色 (表形态)</button>
+        <button class="tab-btn" id="tab-tainted" onclick="switchGroup('tainted')">堕化角色 (里形态)</button>
+      </div>
+      <div class="filters">
+        <button class="filter-btn active" id="filter-all" onclick="setFilter('all')">全部</button>
+        <button class="filter-btn" id="filter-active" onclick="setFilter('active')">未完成</button>
+        <button class="filter-btn" id="filter-priority" onclick="setFilter('priority')">仅看优先 🔴</button>
+      </div>
+    </div>
+    <div class="legend">
+      <div class="legend-item"><div class="legend-dot" style="background-color: var(--priority-border);"></div><span>🔴 优先解锁 (始终在上)</span></div>
+      <div class="legend-item"><div class="legend-dot" style="background-color: var(--normal-border);"></div><span>🟡 推荐解锁</span></div>
+    </div>
+  </div>
+
+  <div id="cardsContainer"></div>
+
+  <footer>
+    <button class="reset-btn" onclick="clearAllProgress()">⚠️ 清空当前分组的所有勾选进度</button>
+  </footer>
+</div>
+
+<script>
+  (function() {
+    // ---------- 数据库 ----------
+    const database = {
+      "normal": [
+        {
+          "character": "以撒 (Isaac)",
+          "items": [
+            { "condition": "撒旦", "unlock": "妈妈的菜刀 (Mom's Knife)", "priority": true, "id": "norm_0_0" },
+            { "condition": "精神错乱", "unlock": "无限面骰", "priority": true, "id": "norm_0_1" },
+            { "condition": "???", "unlock": "六面骰 (D6)", "priority": false, "id": "norm_0_2" },
+            { "condition": "羔羊", "unlock": "寻人启事 [非道具]", "priority": false, "id": "norm_0_3" },
+            { "condition": "祸兽", "unlock": "选择？", "priority": false, "id": "norm_0_4" },
+            { "condition": "普通贪婪", "unlock": "小箱子 [非道具]", "priority": false, "id": "norm_0_5" }
+          ]
+        },
+        {
+          "character": "抹大拉 (Magdalene)",
+          "items": [
+            { "condition": "精神错乱", "unlock": "圣餐 (Eucharist)", "priority": true, "id": "norm_1_0" },
+            { "condition": "头目车轮战", "unlock": "抹大拉的蝴蝶结", "priority": false, "id": "norm_1_1" },
+            { "condition": "死寂", "unlock": "纯洁", "priority": false, "id": "norm_1_2" },
+            { "condition": "以撒", "unlock": "圣遗物", "priority": false, "id": "norm_1_3" },
+            { "condition": "???", "unlock": "凯尔特十字", "priority": false, "id": "norm_1_4" },
+            { "condition": "羔羊", "unlock": "抹大拉的信仰", "priority": false, "id": "norm_1_5" },
+            { "condition": "祸兽", "unlock": "糖心", "priority": false, "id": "norm_1_6" },
+            { "condition": "困难贪婪", "unlock": "平衡符号", "priority": false, "id": "norm_1_7" }
+          ]
+        },
+        {
+          "character": "该隐 (Cain)",
+          "items": [
+            { "condition": "母亲", "unlock": "嗝屁猫的眼睛", "priority": true, "id": "norm_2_0" },
+            { "condition": "以撒", "unlock": "硬币袋", "priority": false, "id": "norm_2_1" },
+            { "condition": "撒旦", "unlock": "炸弹袋", "priority": false, "id": "norm_2_2" },
+            { "condition": "祸兽", "unlock": "一磅肉", "priority": false, "id": "norm_2_3" },
+            { "condition": "困难贪婪", "unlock": "袋中袋", "priority": false, "id": "norm_2_4" }
+          ]
+        },
+        {
+          "character": "犹大 (Judas)",
+          "items": [
+            { "condition": "头目车轮战", "unlock": "犹大的影子", "priority": true, "id": "norm_3_0" },
+            { "condition": "羔羊", "unlock": "弯羊角", "priority": true, "id": "norm_3_1" },
+            { "condition": "困难贪婪", "unlock": "比列之眼", "priority": true, "id": "norm_3_2" },
+            { "condition": "???", "unlock": "左断手", "priority": false, "id": "norm_3_3" },
+            { "condition": "祸兽", "unlock": "赎罪", "priority": false, "id": "norm_3_4" }
+          ]
+        },
+        {
+          "character": "小蓝人 (???)",
+          "items": [
+            { "condition": "以撒", "unlock": "六面骰 (D6)", "priority": true, "id": "norm_4_0" },
+            { "condition": "母亲", "unlock": "永恒六面骰", "priority": true, "id": "norm_4_1" },
+            { "condition": "撒旦", "unlock": "遗忘药", "priority": false, "id": "norm_4_2" },
+            { "condition": "???", "unlock": "宿命", "priority": false, "id": "norm_4_3" }
+          ]
+        },
+        {
+          "character": "夏娃 (Eve)",
+          "items": [
+            { "condition": "精神错乱", "unlock": "钝剃刀片", "priority": true, "id": "norm_5_0" },
+            { "condition": "头目车轮战", "unlock": "夏娃的睫毛膏", "priority": false, "id": "norm_5_1" },
+            { "condition": "死寂", "unlock": "祭祀之刃", "priority": false, "id": "norm_5_2" },
+            { "condition": "撒旦", "unlock": "剃刀片", "priority": false, "id": "norm_5_3" },
+            { "condition": "祸兽", "unlock": "破碎的宝珠", "priority": false, "id": "norm_5_4" }
+          ]
+        },
+        {
+          "character": "参孙 (Samson)",
+          "items": [
+            { "condition": "以撒", "unlock": "嗜血", "priority": true, "id": "norm_6_0" },
+            { "condition": "母亲", "unlock": "嗜血腥风", "priority": true, "id": "norm_6_1" },
+            { "condition": "祸兽", "unlock": "虚空之心", "priority": true, "id": "norm_6_2" },
+            { "condition": "普通贪婪", "unlock": "血誓", "priority": true, "id": "norm_6_3" },
+            { "condition": "死寂", "unlock": "盲目的怒火", "priority": false, "id": "norm_6_4" },
+            { "condition": "???", "unlock": "染血硬币", "priority": false, "id": "norm_6_5" }
+          ]
+        },
+        {
+          "character": "阿撒泻勒 (Azazel)",
+          "items": [
+            { "condition": "以撒", "unlock": "撒旦圣经", "priority": true, "id": "norm_7_0" },
+            { "condition": "???", "unlock": "亚巴顿", "priority": true, "id": "norm_7_1" },
+            { "condition": "祸兽", "unlock": "亚巴顿宝宝", "priority": true, "id": "norm_7_2" },
+            { "condition": "普通贪婪", "unlock": "解锁角色莉莉丝", "priority": true, "id": "norm_7_3" },
+            { "condition": "头目车轮战", "unlock": "钉子", "priority": false, "id": "norm_7_4" },
+            { "condition": "死寂", "unlock": "虚空之喉", "priority": false, "id": "norm_7_5" },
+            { "condition": "母亲", "unlock": "恶魔王冠", "priority": false, "id": "norm_7_6" }
+          ]
+        },
+        {
+          "character": "拉撒路 (Lazarus)",
+          "items": [
+            { "condition": "精神错乱", "unlock": "复杂性骨折", "priority": false, "id": "norm_8_0" },
+            { "condition": "以撒", "unlock": "空容器", "priority": false, "id": "norm_8_1" },
+            { "condition": "撒旦", "unlock": "拉撒路的绷带", "priority": false, "id": "norm_8_2" },
+            { "condition": "???", "unlock": "商店积分", "priority": false, "id": "norm_8_3" },
+            { "condition": "羔羊", "unlock": "潘多拉魔盒 [非道具]", "priority": false, "id": "norm_8_4" },
+            { "condition": "祸兽", "unlock": "灵魂出窍", "priority": false, "id": "norm_8_5" }
+          ]
+        },
+        {
+          "character": "伊甸 (Eden)",
+          "items": [
+            { "condition": "母亲", "unlock": "M (M进程)", "priority": true, "id": "norm_9_0" },
+            { "condition": "头目车轮战", "unlock": "未定义", "priority": false, "id": "norm_9_1" },
+            { "condition": "死寂", "unlock": "伊甸的祝福", "priority": false, "id": "norm_9_2" },
+            { "condition": "以撒", "unlock": "空白卡牌", "priority": false, "id": "norm_9_3" },
+            { "condition": "撒旦", "unlock": "秘密之书", "priority": false, "id": "norm_9_4" },
+            { "condition": "羔羊", "unlock": "潘多拉魔盒", "priority": false, "id": "norm_9_5" },
+            { "condition": "精神错乱", "unlock": "伊甸的灵魂", "priority": false, "id": "norm_9_6" },
+            { "condition": "祸兽", "unlock": "百宝罐", "priority": true, "id": "norm_9_7" },
+            { "condition": "困难贪婪", "unlock": "节拍器", "priority": false, "id": "norm_9_8" }
+          ]
+        },
+        {
+          "character": "游魂 (The Lost)",
+          "items": [
+            { "condition": "完成所有困难模式", "unlock": "神性", "priority": true, "id": "norm_10_0" },
+            { "condition": "头目车轮战", "unlock": "一百面骰", "priority": false, "id": "norm_10_1" },
+            { "condition": "以撒", "unlock": "以撒的心脏", "priority": false, "id": "norm_10_2" },
+            { "condition": "撒旦", "unlock": "心智", "priority": false, "id": "norm_10_3" },
+            { "condition": "???", "unlock": "肉体", "priority": false, "id": "norm_10_4" },
+            { "condition": "羔羊", "unlock": "灵魂", "priority": false, "id": "norm_10_5" },
+            { "condition": "精神错乱", "unlock": "神圣卡", "priority": false, "id": "norm_10_6" }
+          ]
+        },
+        {
+          "character": "莉莉丝 (Lilith)",
+          "items": [
+            { "condition": "死寂", "unlock": "淫魔", "priority": true, "id": "norm_11_0" },
+            { "condition": "以撒", "unlock": "符文袋", "priority": true, "id": "norm_11_1" },
+            { "condition": "???", "unlock": "恶魔受胎", "priority": true, "id": "norm_11_2" },
+            { "condition": "母亲", "unlock": "嗜血小宠", "priority": false, "id": "norm_11_3" },
+            { "condition": "祸兽", "unlock": "剖腹产", "priority": true, "id": "norm_11_4" },
+            { "condition": "头目车轮战", "unlock": "圣灵受胎", "priority": false, "id": "norm_11_5" },
+            { "condition": "撒旦", "unlock": "蛇蝎之吻", "priority": false, "id": "norm_11_6" },
+            { "condition": "羔羊", "unlock": "魅魔", "priority": false, "id": "norm_11_7" },
+            { "condition": "精神错乱", "unlock": "安乐死", "priority": false, "id": "norm_11_8" }
+          ]
+        },
+        {
+          "character": "店主 (Keeper)",
+          "items": [
+            { "condition": "精神错乱", "unlock": "弯币", "priority": true, "id": "norm_12_0" },
+            { "condition": "母亲", "unlock": "店主的胯袋", "priority": true, "id": "norm_12_5" },
+            { "condition": "死寂", "unlock": "一枚硬币", "priority": false, "id": "norm_12_1" },
+            { "condition": "以撒", "unlock": "木制硬币", "priority": false, "id": "norm_12_2" },
+            { "condition": "???", "unlock": "深口袋", "priority": false, "id": "norm_12_3" },
+            { "condition": "超级撒旦", "unlock": "上吊绳宝宝 [非道具]", "priority": false, "id": "norm_12_4" },
+            { "condition": "普通贪婪", "unlock": "贪婪的肋骨", "priority": false, "id": "norm_12_6" }
+          ]
+        },
+        {
+          "character": "亚玻伦 (Apollyon)",
+          "items": [
+            { "condition": "精神错乱", "unlock": "虚空", "priority": true, "id": "norm_13_0" },
+            { "condition": "困难妈心", "unlock": "熔炉", "priority": false, "id": "norm_13_1" },
+            { "condition": "祸兽", "unlock": "触手朋友", "priority": false, "id": "norm_13_2" },
+            { "condition": "普通贪婪", "unlock": "黑符文", "priority": false, "id": "norm_13_3" }
+          ]
+        },
+        {
+          "character": "遗骸 (The Forgotten)",
+          "items": [
+            { "condition": "羔羊", "unlock": "脆骨症", "priority": true, "id": "norm_14_0" },
+            { "condition": "头目车轮战", "unlock": "离婚协议书", "priority": false, "id": "norm_14_1" },
+            { "condition": "困难妈心", "unlock": "骨髓", "priority": false, "id": "norm_14_2" },
+            { "condition": "死寂", "unlock": "圣地大便", "priority": false, "id": "norm_14_3" },
+            { "condition": "撒旦", "unlock": "尖肋骨", "priority": false, "id": "norm_14_4" },
+            { "condition": "???", "unlock": "颌骨", "priority": false, "id": "norm_14_5" },
+            { "condition": "精神错乱", "unlock": "亡者之书", "priority": false, "id": "norm_14_6" }
+          ]
+        },
+        {
+          "character": "伯大尼 (Bethany)",
+          "items": [
+            { "condition": "???", "unlock": "神圣硬币", "priority": true, "id": "norm_15_0" },
+            { "condition": "母亲", "unlock": "终末天启", "priority": true, "id": "norm_15_1" },
+            { "condition": "以撒", "unlock": "美德之书", "priority": false, "id": "norm_15_2" },
+            { "condition": "撒旦", "unlock": "灵魂之翁", "priority": false, "id": "norm_15_3" },
+            { "condition": "精神错乱", "unlock": "伯列恒之星", "priority": false, "id": "norm_15_4" },
+            { "condition": "普通贪婪", "unlock": "灵魂吊坠", "priority": false, "id": "norm_15_5" }
+          ]
+        },
+        {
+          "character": "雅各和以扫 (Jacob & Esau)",
+          "items": [
+            { "condition": "以撒", "unlock": "天堂的阶梯", "priority": true, "id": "norm_16_0" },
+            { "condition": "羔羊", "unlock": "达摩克利斯之剑", "priority": true, "id": "norm_16_1" },
+            { "condition": "精神错乱", "unlock": "背摔", "priority": false, "id": "norm_16_2" },
+            { "condition": "头目车轮战", "unlock": "谷底石", "priority": true, "id": "norm_16_4" },
+            { "condition": "死寂", "unlock": "消失的跑胎", "priority": false, "id": "norm_16_5" },
+            { "condition": "普通贪婪", "unlock": "内在儿童", "priority": false, "id": "norm_16_6" },
+            { "condition": "困难贪婪", "unlock": "创世纪", "priority": false, "id": "norm_16_7" },
+            { "condition": "???", "unlock": "长子权", "priority": true, "id": "norm_16_8" }
+          ]
+        }
+      ],
+      "tainted": [
+        {
+          "character": "堕化以撒 (Tainted Isaac)",
+          "items": [
+            { "condition": "精神错乱", "unlock": "计数二十面骰 (红骰子)", "priority": true, "id": "taint_0_0" },
+            { "condition": "母亲", "unlock": "骰子袋", "priority": true, "id": "taint_0_1" },
+            { "condition": "头目/死寂", "unlock": "以撒的魂石", "priority": true, "id": "taint_0_2" },
+            { "condition": "超级撒旦", "unlock": "大箱子 [非道具]", "priority": false, "id": "taint_0_3" },
+            { "condition": "祸兽", "unlock": "错误王冠", "priority": true, "id": "taint_0_4" },
+            { "condition": "困难贪婪", "unlock": "星星？卡牌", "priority": false, "id": "taint_0_5" }
+          ]
+        },
+        {
+          "character": "堕化抹大拉 (Tainted Magdalene)",
+          "items": [
+            { "condition": "超级撒旦", "unlock": "红桃Q", "priority": false, "id": "taint_1_0" },
+            { "condition": "精神错乱", "unlock": "高凝血", "priority": false, "id": "taint_1_1" },
+            { "condition": "母亲", "unlock": "母亲的吻", "priority": false, "id": "taint_1_2" },
+            { "condition": "祸兽", "unlock": "肚肚软糖", "priority": false, "id": "taint_1_3" },
+            { "condition": "困难贪婪", "unlock": "恋人？卡牌", "priority": false, "id": "taint_1_4" }
+          ]
+        },
+        {
+          "character": "堕化该隐 (Tainted Cain)",
+          "items": [
+            { "condition": "头目/死寂", "unlock": "该隐的魂石", "priority": true, "id": "taint_2_0" },
+            { "condition": "以撒/撒旦/???/羔羊", "unlock": "镀金钥匙", "priority": false, "id": "taint_2_1" },
+            { "condition": "精神错乱", "unlock": "合成宝袋", "priority": false, "id": "taint_2_2" }
+          ]
+        },
+        {
+          "character": "堕化犹大 (Tainted Judas)",
+          "items": [
+            { "condition": "头目/死寂", "unlock": "犹大的魂石", "priority": false, "id": "taint_3_0" },
+            { "condition": "精神错乱", "unlock": "暗仪刺刀", "priority": true, "id": "taint_3_1" },
+            { "condition": "祸兽", "unlock": "血色羁绊", "priority": true, "id": "taint_3_2" },
+            { "condition": "以撒/撒旦/???/羔羊", "unlock": "你的灵魂", "priority": false, "id": "taint_3_3" },
+            { "condition": "超级撒旦", "unlock": "黑福袋 [非道具]", "priority": false, "id": "taint_3_4" }
+          ]
+        },
+        {
+          "character": "堕化小蓝人 (Tainted ???)",
+          "items": [
+            { "condition": "祸兽", "unlock": "虫群", "priority": false, "id": "taint_4_0" },
+            { "condition": "困难贪婪", "unlock": "皇帝？卡牌", "priority": false, "id": "taint_4_1" }
+          ]
+        },
+        {
+          "character": "堕化夏娃 (Tainted Eve)",
+          "items": [
+            { "condition": "精神错乱", "unlock": "圣血吸管", "priority": true, "id": "taint_5_0" },
+            { "condition": "头目/死寂", "unlock": "夏娃的魂石", "priority": false, "id": "taint_5_1" },
+            { "condition": "母亲", "unlock": "小血团", "priority": false, "id": "taint_5_2" },
+            { "condition": "祸兽", "unlock": "心碎", "priority": false, "id": "taint_5_3" },
+            { "condition": "困难贪婪", "unlock": "皇后？卡牌", "priority": false, "id": "taint_5_4" }
+          ]
+        },
+        {
+          "character": "堕化参孙 (Tainted Samson)",
+          "items": [
+            { "condition": "以撒/撒旦/???/羔羊", "unlock": "纹身贴", "priority": false, "id": "taint_6_0" },
+            { "condition": "超级撒旦", "unlock": "夹娃娃机 [非道具]", "priority": false, "id": "taint_6_1" },
+            { "condition": "祸兽", "unlock": "祸兽相关", "priority": false, "id": "taint_6_2" }
+          ]
+        },
+        {
+          "character": "堕化阿撒泻勒 (Tainted Azazel)",
+          "items": [
+            { "condition": "头目/死寂", "unlock": "阿撒泻勒的魂石", "priority": true, "id": "taint_7_0" },
+            { "condition": "困难贪婪", "unlock": "恶魔？卡牌", "priority": false, "id": "taint_7_1" }
+          ]
+        },
+        {
+          "character": "堕化拉撒路 (Tainted Lazarus)",
+          "items": [
+            { "condition": "精神错乱", "unlock": "生死逆转 (Flip)", "priority": true, "id": "taint_8_0" },
+            { "condition": "以撒/撒旦/???/羔羊", "unlock": "破损的口袋", "priority": false, "id": "taint_8_1" },
+            { "condition": "超级撒旦", "unlock": "木箱子 [非道具]", "priority": false, "id": "taint_8_2" },
+            { "condition": "祸兽", "unlock": "救恩", "priority": false, "id": "taint_8_3" }
+          ]
+        },
+        {
+          "character": "堕化伊甸 (Tainted Eden)",
+          "items": [
+            { "condition": "头目/死寂", "unlock": "伊甸的魂石", "priority": true, "id": "taint_9_0" },
+            { "condition": "超级撒旦", "unlock": "万用牌", "priority": false, "id": "taint_9_1" },
+            { "condition": "困难贪婪", "unlock": "世界？卡牌", "priority": false, "id": "taint_9_2" }
+          ]
+        },
+        {
+          "character": "堕化游魂 (Tainted Lost)",
+          "items": [
+            { "condition": "头目/死寂", "unlock": "游魂的魂石", "priority": false, "id": "taint_10_0" },
+            { "condition": "祸兽", "unlock": "十字圣球", "priority": true, "id": "taint_10_1" },
+            { "condition": "以撒/撒旦/???/羔羊", "unlock": "儿童涂鸦", "priority": false, "id": "taint_10_2" },
+            { "condition": "母亲", "unlock": "水晶钥匙", "priority": false, "id": "taint_10_3" },
+            { "condition": "困难贪婪", "unlock": "0-愚者？卡牌", "priority": false, "id": "taint_10_4" }
+          ]
+        },
+        {
+          "character": "堕化莉莉丝 (Tainted Lilith)",
+          "items": [
+            { "condition": "头目/死寂", "unlock": "莉莉丝的魂石", "priority": false, "id": "taint_11_0" },
+            { "condition": "超级撒旦", "unlock": "愚人金 [非道具]", "priority": false, "id": "taint_11_1" },
+            { "condition": "精神错乱", "unlock": "格罗", "priority": false, "id": "taint_11_2" },
+            { "condition": "母亲", "unlock": "领养协议书", "priority": false, "id": "taint_11_3" },
+            { "condition": "祸兽", "unlock": "作孽双子", "priority": true, "id": "taint_11_4" }
+          ]
+        },
+        {
+          "character": "堕化店主 (Tainted Keeper)",
+          "items": [
+            { "condition": "头目/死寂", "unlock": "店主的魂石", "priority": false, "id": "taint_12_0" },
+            { "condition": "以撒/撒旦/???/羔羊", "unlock": "店主的协议", "priority": false, "id": "taint_12_1" },
+            { "condition": "超级撒旦", "unlock": "金硬币 [非道具]", "priority": false, "id": "taint_12_2" },
+            { "condition": "困难贪婪", "unlock": "倒吊人？卡牌", "priority": false, "id": "taint_12_3" }
+          ]
+        },
+        {
+          "character": "堕化亚玻伦 (Tainted Apollyon)",
+          "items": [
+            { "condition": "精神错乱", "unlock": "无底坑", "priority": true, "id": "taint_13_0" },
+            { "condition": "头目/死寂", "unlock": "亚玻伦的魂石", "priority": false, "id": "taint_13_1" },
+            { "condition": "祸兽", "unlock": "回声室", "priority": false, "id": "taint_13_2" },
+            { "condition": "困难贪婪", "unlock": "塔？卡牌", "priority": false, "id": "taint_13_3" }
+          ]
+        },
+        {
+          "character": "堕化遗骸 (Tainted Forgotten)",
+          "items": [
+            { "condition": "头目/死寂", "unlock": "遗骸的魂石", "priority": false, "id": "taint_14_0" },
+            { "condition": "母亲", "unlock": "空壳心", "priority": false, "id": "taint_14_1" },
+            { "condition": "祸兽", "unlock": "以撒的坟墓", "priority": false, "id": "taint_14_2" }
+          ]
+        },
+        {
+          "character": "堕化伯大尼 (Tainted Bethany)",
+          "items": [
+            { "condition": "超级撒旦", "unlock": "忏悔室 [非道具]", "priority": false, "id": "taint_15_0" },
+            { "condition": "母亲", "unlock": "所罗门魔典", "priority": false, "id": "taint_15_1" },
+            { "condition": "困难贪婪", "unlock": "教皇？卡牌", "priority": false, "id": "taint_15_2" }
+          ]
+        },
+        {
+          "character": "堕化雅各 (Tainted Jacob)",
+          "items": [
+            { "condition": "超级撒旦", "unlock": "金饰品 [非道具]", "priority": false, "id": "taint_16_0" },
+            { "condition": "母亲", "unlock": "复得游魂", "priority": false, "id": "taint_16_1" },
+            { "condition": "祸兽", "unlock": "小以扫", "priority": false, "id": "taint_16_2" },
+            { "condition": "困难贪婪", "unlock": "太阳与月亮卡牌", "priority": false, "id": "taint_16_3" }
+          ]
+        }
+      ]
+    };
+
+    // ---------- 状态 ----------
+    const STORAGE_KEY = "isaac_repentance_v3_";
+    let currentGroup = 'normal';
+    let currentFilter = 'all';
+    let savedProgress = {};
+
+    // ---------- 工具函数 ----------
+    function loadProgress() {
+      try {
+        const stored = localStorage.getItem(STORAGE_KEY + "progress");
+        if (stored) savedProgress = JSON.parse(stored);
+      } catch (e) { savedProgress = {}; }
+    }
+
+    function saveProgress() {
+      localStorage.setItem(STORAGE_KEY + "progress", JSON.stringify(savedProgress));
+    }
+
+    function escapeHtml(str) {
+      return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+    }
+
+    /** 返回当前角色过滤后并按 priority 降序排列的条目 */
+    function getDisplayedItems(charData) {
+      return charData.items.filter(item => {
+        const checked = !!savedProgress[item.id];
+        if (currentFilter === 'active' && checked) return false;
+        if (currentFilter === 'priority' && !item.priority) return false;
+        return true;
+      }).sort((a, b) => (b.priority ? 1 : 0) - (a.priority ? 1 : 0));
+    }
+
+    // ---------- 渲染 ----------
+    function renderList() {
+      const container = document.getElementById('cardsContainer');
+      container.innerHTML = '';
+      const characters = database[currentGroup];
+      let globalTotal = 0;
+      let globalCompleted = 0;
+
+      characters.forEach(charData => {
+        // 全量统计（不受过滤影响）
+        charData.items.forEach(item => {
+          globalTotal++;
+          if (!!savedProgress[item.id]) globalCompleted++;
+        });
+
+        const displayed = getDisplayedItems(charData);
+        if (displayed.length === 0) return;
+
+        let charTotal = 0;
+        let charCompleted = 0;
+        let rowsHtml = '';
+
+        displayed.forEach(item => {
+          charTotal++;
+          const isChecked = !!savedProgress[item.id];
+          if (isChecked) charCompleted++;
+
+          const rowClass = item.priority ? 'priority-row' : 'normal-row';
+          const checkedClass = isChecked ? 'checked-row' : '';
+          const tagHtml = item.priority
+            ? '<span class="tag tag-priority">优先</span>'
+            : '<span class="tag tag-recommend">推荐</span>';
+
+          rowsHtml += `
+            <div class="item-row ${rowClass} ${checkedClass}" onclick="window._toggleItem('${item.id}', this)">
+              <div class="checkbox-wrapper">
+                <input type="checkbox" id="chk-${item.id}" ${isChecked ? 'checked' : ''}>
+              </div>
+              <div class="row-content">
+                <div>
+                  <span class="route-boss">${escapeHtml(item.condition)}</span>
+                  <span class="arrow-separator">➔</span>
+                  <span class="unlock-name">${escapeHtml(item.unlock)}</span>
+                </div>
+                <div class="tags-wrapper">${tagHtml}</div>
+              </div>
+            </div>`;
+        });
+
+        const card = document.createElement('div');
+        card.className = 'character-card';
+        card.innerHTML = `
+          <div class="character-title">
+            <span>${escapeHtml(charData.character)}</span>
+            <span class="char-progress-tag">进度: ${charCompleted}/${charTotal}</span>
+          </div>
+          <div class="list-group">${rowsHtml}</div>`;
+        container.appendChild(card);
+      });
+
+      if (container.children.length === 0) {
+        container.innerHTML = '<div class="no-items-message">没有符合当前过滤条件的解锁项。</div>';
+      }
+
+      updateGlobalStats(globalCompleted, globalTotal);
+    }
+
+    function updateGlobalStats(completed, total) {
+      const fill = document.getElementById('progressFill');
+      const text = document.getElementById('progressText');
+      const percent = total > 0 ? Math.round((completed / total) * 100) : 0;
+      fill.style.width = percent + '%';
+      text.textContent = `${completed} / ${total} (${percent}%)`;
+    }
+
+    // 勾选/取消勾选
+    window._toggleItem = function(id, element) {
+      const checkbox = document.getElementById('chk-' + id);
+      if (!checkbox) return;
+      const newState = !checkbox.checked;
+      checkbox.checked = newState;
+      savedProgress[id] = newState;
+      element.classList.toggle('checked-row', newState);
+      saveProgress();
+
+      if (currentFilter === 'active') {
+        // 未完成视图下，勾选后条目会消失，重新渲染
+        setTimeout(renderList, 150);
+      } else {
+        // 其它视图下，只更新统计数字和角色进度标签，不重新排序
+        refreshStatsOnly();
+      }
+    };
+
+    function refreshStatsOnly() {
+      const characters = database[currentGroup];
+      let globalTotal = 0;
+      let globalCompleted = 0;
+
+      characters.forEach(charData => {
+        charData.items.forEach(item => {
+          globalTotal++;
+          if (!!savedProgress[item.id]) globalCompleted++;
+        });
+      });
+      updateGlobalStats(globalCompleted, globalTotal);
+
+      // 更新每个角色卡片的进度标签
+      const cards = document.querySelectorAll('.character-card');
+      let cardIdx = 0;
+      characters.forEach(charData => {
+        const displayed = getDisplayedItems(charData);
+        if (displayed.length === 0) return;
+        let charTotal = 0;
+        let charCompleted = 0;
+        displayed.forEach(item => {
+          charTotal++;
+          if (!!savedProgress[item.id]) charCompleted++;
+        });
+        if (cards[cardIdx]) {
+          const tag = cards[cardIdx].querySelector('.char-progress-tag');
+          if (tag) tag.textContent = `进度: ${charCompleted}/${charTotal}`;
+          cardIdx++;
+        }
+      });
+    }
+
+    // ---------- 交互 ----------
+    window.switchGroup = function(groupKey) {
+      currentGroup = groupKey;
+      document.getElementById('tab-normal').classList.toggle('active', groupKey === 'normal');
+      document.getElementById('tab-tainted').classList.toggle('active', groupKey === 'tainted');
+      document.getElementById('groupProgressLabel').textContent =
+        groupKey === 'normal' ? '总完成进度 (普通角色)' : '总完成进度 (堕化角色)';
+      renderList();
+    };
+
+    window.setFilter = function(filterKey) {
+      currentFilter = filterKey;
+      document.getElementById('filter-all').classList.toggle('active', filterKey === 'all');
+      document.getElementById('filter-active').classList.toggle('active', filterKey === 'active');
+      document.getElementById('filter-priority').classList.toggle('active', filterKey === 'priority');
+      renderList();
+    };
+
+    window.clearAllProgress = function() {
+      const label = currentGroup === 'normal' ? '普通角色 (表形态)' : '堕化角色 (里形态)';
+      if (confirm(`确认重置【${label}】的全部勾选进度吗？此操作不可撤销。`)) {
+        const chars = database[currentGroup];
+        chars.forEach(c => c.items.forEach(item => delete savedProgress[item.id]));
+        saveProgress();
+        renderList();
+      }
+    };
+
+    // 启动
+    window.onload = function() {
+      loadProgress();
+      renderList();
+    };
+  })();
+</script>
+</body>
+</html>
