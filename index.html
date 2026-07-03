@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
   <title>以撒的结合：忏悔 · 解锁清单</title>
-  <script data-goatcounter="https://akira.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
   <style>
     :root {
       --bg-color: #0d0d11;
@@ -319,56 +318,6 @@
       color: #71717a;
       font-size: 14px;
     }
-    .welcome-overlay {
-      position: fixed;
-      inset: 0;
-      background-color: rgba(0, 0, 0, 0.75);
-      z-index: 1000;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-    }
-    .welcome-modal {
-      background-color: var(--container-bg);
-      border: 1px solid #2e2e35;
-      border-radius: 14px;
-      padding: 26px 24px;
-      max-width: 420px;
-      width: 100%;
-      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
-      text-align: center;
-    }
-    .welcome-modal h2 {
-      font-size: 18px;
-      color: #ffffff;
-      margin-bottom: 14px;
-    }
-    .welcome-modal p {
-      font-size: 14px;
-      line-height: 1.7;
-      color: #c7c7cc;
-      margin-bottom: 20px;
-      text-align: left;
-    }
-    .welcome-modal .warn-icon {
-      font-size: 30px;
-      margin-bottom: 10px;
-    }
-    .welcome-confirm-btn {
-      background-color: #0284c7;
-      border: 1px solid #0ea5e9;
-      color: white;
-      padding: 10px 32px;
-      font-size: 14px;
-      font-weight: 600;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-    .welcome-confirm-btn:hover {
-      background-color: #0ea5e9;
-    }
     @media (max-width: 600px) {
       body {
         padding: 10px 6px;
@@ -393,14 +342,6 @@
   </style>
 </head>
 <body>
-<div class="welcome-overlay" id="welcomeOverlay">
-  <div class="welcome-modal">
-    <div class="warn-icon">⚠️</div>
-    <h2>使用须知</h2>
-    <p>请复制到自己的常用浏览器使用，由于本工具数据存储在浏览器的本地缓存（LocalStorage）中，清除浏览器缓存或使用隐私无痕模式会导致勾选的进度丢失，请谨慎清理。</p>
-    <button class="welcome-confirm-btn" onclick="window._closeWelcome()">知道了</button>
-  </div>
-</div>
 <div class="container">
   <div class="top-credit">
     由 <span>Gemini</span>, <span>DeepSeek</span>, <span>Claude</span> 联合创作 · 制作：<span>Akira</span>
@@ -815,16 +756,8 @@
       } catch (e) { savedProgress = {}; }
     }
 
-    let storageWarned = false;
     function saveProgress() {
-      try {
-        localStorage.setItem(STORAGE_KEY + "progress", JSON.stringify(savedProgress));
-      } catch (e) {
-        if (!storageWarned) {
-          storageWarned = true;
-          alert("当前浏览器环境无法保存进度（可能处于隐私模式，或该浏览器限制了本地存储）。建议改用手机自带浏览器（如 Safari / Chrome）打开本页面。");
-        }
-      }
+      localStorage.setItem(STORAGE_KEY + "progress", JSON.stringify(savedProgress));
     }
 
     function escapeHtml(str) {
@@ -996,24 +929,11 @@
       }
     };
 
-    // 开屏提示
-    window._closeWelcome = function() {
-      const overlay = document.getElementById('welcomeOverlay');
-      if (overlay) overlay.style.display = 'none';
-    };
-
     // 启动
-    function initApp() {
+    window.onload = function() {
       loadProgress();
       renderList();
-    }
-    if (document.readyState === 'complete' || document.readyState === 'interactive') {
-      // 文档已经解析完成（部分移动端内嵌浏览器中 onload 可能不会再触发），直接初始化
-      initApp();
-    } else {
-      document.addEventListener('DOMContentLoaded', initApp);
-    }
-    window.onload = initApp; // 双保险，即使上面已执行也不会重复渲染出问题
+    };
   })();
 </script>
 </body>
