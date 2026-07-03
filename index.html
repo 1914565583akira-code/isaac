@@ -815,8 +815,16 @@
       } catch (e) { savedProgress = {}; }
     }
 
+    let storageWarned = false;
     function saveProgress() {
-      localStorage.setItem(STORAGE_KEY + "progress", JSON.stringify(savedProgress));
+      try {
+        localStorage.setItem(STORAGE_KEY + "progress", JSON.stringify(savedProgress));
+      } catch (e) {
+        if (!storageWarned) {
+          storageWarned = true;
+          alert("当前浏览器环境无法保存进度（可能处于隐私模式，或该浏览器限制了本地存储）。建议改用手机自带浏览器（如 Safari / Chrome）打开本页面。");
+        }
+      }
     }
 
     function escapeHtml(str) {
@@ -995,10 +1003,17 @@
     };
 
     // 启动
-    window.onload = function() {
+    function initApp() {
       loadProgress();
       renderList();
-    };
+    }
+    if (document.readyState === 'complete' || document.readyState === 'interactive') {
+      // 文档已经解析完成（部分移动端内嵌浏览器中 onload 可能不会再触发），直接初始化
+      initApp();
+    } else {
+      document.addEventListener('DOMContentLoaded', initApp);
+    }
+    window.onload = initApp; // 双保险，即使上面已执行也不会重复渲染出问题
   })();
 </script>
 </body>
