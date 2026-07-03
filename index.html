@@ -339,9 +339,78 @@
         font-size: 13px;
       }
     }
+
+    /* 新增：开屏提示遮罩层与弹窗样式 */
+    .splash-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.85);
+      z-index: 9999;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+    .splash-content {
+      background-color: var(--container-bg);
+      border: 2px solid var(--priority-border);
+      border-radius: 16px;
+      padding: 24px;
+      max-width: 450px;
+      width: 100%;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
+      text-align: center;
+    }
+    .splash-title {
+      font-size: 20px;
+      color: #ffffff;
+      font-weight: 800;
+      margin-bottom: 12px;
+    }
+    .splash-text {
+      font-size: 14px;
+      color: #c7c7cc;
+      line-height: 1.6;
+      margin-bottom: 20px;
+      text-align: left;
+    }
+    .splash-btn {
+      background-gradient: linear-gradient(90deg, #10b981, #059669);
+      background-color: #10b981;
+      border: none;
+      color: white;
+      padding: 12px 32px;
+      font-size: 14px;
+      font-weight: 700;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      width: 100%;
+    }
+    .splash-btn:hover {
+      background-color: #059669;
+      transform: translateY(-1px);
+    }
   </style>
 </head>
 <body>
+
+<!-- 新增：开屏提示 HTML 结构 (默认隐藏) -->
+<div id="splashOverlay" class="splash-overlay" style="display: none;">
+  <div class="splash-content">
+    <div class="splash-title">⚠ 注意!</div>
+    <div class="splash-text">
+      请复制到自己的常用浏览器使用，
+      由于本工具数据存储在浏览器的本地缓存（LocalStorage）中，
+      清除浏览器缓存或使用隐私无痕模式会导致勾选的进度丢失，请谨慎清理。选择“知道了”关闭界面
+    </div>
+    <button class="splash-btn" onclick="window._closeSplash()">知道了</button>
+  </div>
+</div>
+
 <div class="container">
   <div class="top-credit">
     由 <span>Gemini</span>, <span>DeepSeek</span>, <span>Claude</span> 联合创作 · 制作：<span>Akira</span>
@@ -397,7 +466,7 @@
           "items": [
             { "condition": "撒旦", "unlock": "妈妈的菜刀 (Mom's Knife)", "priority": true, "id": "norm_0_0" },
             { "condition": "精神错乱", "unlock": "无限面骰", "priority": true, "id": "norm_0_1" },
-            { "condition": "???", "unlock": "六面骰 (D6)", "priority": false, "id": "norm_0_2" },
+            { "condition": "???", "unlock": "二十面骰 (D20)", "priority": false, "id": "norm_0_2" },
             { "condition": "羔羊", "unlock": "寻人启事 [非道具]", "priority": false, "id": "norm_0_3" },
             { "condition": "祸兽", "unlock": "选择？", "priority": false, "id": "norm_0_4" },
             { "condition": "普通贪婪", "unlock": "小箱子 [非道具]", "priority": false, "id": "norm_0_5" }
@@ -482,11 +551,11 @@
           "character": "拉撒路 (Lazarus)",
           "items": [
             { "condition": "精神错乱", "unlock": "复杂性骨折", "priority": false, "id": "norm_8_0" },
-            { "condition": "以撒", "unlock": "空容器", "priority": false, "id": "norm_8_1" },
-            { "condition": "撒旦", "unlock": "拉撒路的绷带", "priority": false, "id": "norm_8_2" },
+            { "condition": "以撒", "unlock": "拉撒路的绷带", "priority": false, "id": "norm_8_1" },
             { "condition": "???", "unlock": "商店积分", "priority": false, "id": "norm_8_3" },
             { "condition": "羔羊", "unlock": "潘多拉魔盒 [非道具]", "priority": false, "id": "norm_8_4" },
-            { "condition": "祸兽", "unlock": "灵魂出窍", "priority": false, "id": "norm_8_5" }
+            { "condition": "祸兽", "unlock": "灵魂出窍", "priority": false, "id": "norm_8_5" },
+            { "condition": "死寂", "unlock": "空容器", "priority": false, "id": "norm_8_6" }
           ]
         },
         {
@@ -497,7 +566,7 @@
             { "condition": "死寂", "unlock": "伊甸的祝福", "priority": false, "id": "norm_9_2" },
             { "condition": "以撒", "unlock": "空白卡牌", "priority": false, "id": "norm_9_3" },
             { "condition": "撒旦", "unlock": "秘密之书", "priority": false, "id": "norm_9_4" },
-            { "condition": "羔羊", "unlock": "潘多拉魔盒", "priority": false, "id": "norm_9_5" },
+            { "condition": "羔羊", "unlock": "神秘的袋子", "priority": false, "id": "norm_9_5" },
             { "condition": "精神错乱", "unlock": "伊甸的灵魂", "priority": false, "id": "norm_9_6" },
             { "condition": "祸兽", "unlock": "百宝罐", "priority": true, "id": "norm_9_7" },
             { "condition": "困难贪婪", "unlock": "节拍器", "priority": false, "id": "norm_9_8" }
@@ -744,6 +813,7 @@
 
     // ---------- 状态 ----------
     const STORAGE_KEY = "isaac_repentance_v3_";
+    const SPLASH_KEY = "isaac_splash_shown"; // 新增：独立的开屏标记键名
     let currentGroup = 'normal';
     let currentFilter = 'all';
     let savedProgress = {};
@@ -773,6 +843,23 @@
         return true;
       }).sort((a, b) => (b.priority ? 1 : 0) - (a.priority ? 1 : 0));
     }
+
+    // ---------- 新增：开屏显示与关闭逻辑 ----------
+    function checkAndShowSplash() {
+      try {
+        const hasShown = localStorage.getItem(SPLASH_KEY);
+        if (!hasShown) {
+          document.getElementById('splashOverlay').style.display = 'flex';
+        }
+      } catch(e) {}
+    }
+
+    window._closeSplash = function() {
+      document.getElementById('splashOverlay').style.display = 'none';
+      try {
+        localStorage.setItem(SPLASH_KEY, 'true');
+      } catch(e) {}
+    };
 
     // ---------- 渲染 ----------
     function renderList() {
@@ -933,6 +1020,7 @@
     window.onload = function() {
       loadProgress();
       renderList();
+      checkAndShowSplash(); // 新增：数据加载渲染后独立执行检测
     };
   })();
 </script>
