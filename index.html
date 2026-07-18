@@ -16,6 +16,9 @@
       --normal-bg: #423500;
       --normal-border: #ffc107;
       --normal-text: #fffbe6;
+      --low-bg: #2a2a30;
+      --low-border: #d4d4d8;
+      --low-text: #e4e4e7;
       --checked-bg: #222228;
       --checked-text: #6b6b75;
       --checked-border: #44444c;
@@ -228,6 +231,11 @@
       border-left-color: var(--normal-border);
       color: var(--normal-text);
     }
+    .item-row.low-row {
+      background-color: var(--low-bg);
+      border-left-color: var(--low-border);
+      color: var(--low-text);
+    }
     .item-row.checked-row {
       background-color: var(--checked-bg) !important;
       border-left-color: var(--checked-border) !important;
@@ -292,6 +300,10 @@
       background-color: #eab308;
       color: #451a03;
     }
+    .tag-low {
+      background-color: #d4d4d8;
+      color: #27272a;
+    }
     footer {
       margin-top: 30px;
       text-align: center;
@@ -310,6 +322,27 @@
     }
     .reset-btn:hover {
       background-color: #5c1e22;
+      color: white;
+    }
+    .io-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    .io-btn {
+      flex: 1;
+      background-color: #16211c;
+      color: #86efac;
+      border: 1px solid #1f3a2e;
+      padding: 12px 16px;
+      font-size: 14px;
+      font-weight: 600;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .io-btn:hover {
+      background-color: #1f3a2e;
       color: white;
     }
     .no-items-message {
@@ -377,6 +410,21 @@
       margin-bottom: 20px;
       text-align: left;
     }
+    .splash-divider {
+      height: 1px;
+      background-color: #2e2e35;
+      margin-bottom: 16px;
+    }
+    .splash-update-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: #6ee7b7;
+      margin-bottom: 10px;
+      text-align: left;
+    }
+    .splash-update-text {
+      margin-bottom: 22px;
+    }
     .splash-btn {
       background-gradient: linear-gradient(90deg, #10b981, #059669);
       background-color: #10b981;
@@ -405,7 +453,13 @@
     <div class="splash-text">
       请复制到自己的常用浏览器使用，
       由于本工具数据存储在浏览器的本地缓存（LocalStorage）中，
-      清除浏览器缓存或使用隐私无痕模式会导致勾选的进度丢失，请谨慎清理。选择“知道了”关闭界面。
+      清除浏览器缓存或使用隐私无痕模式会导致勾选的进度丢失，请谨慎清理。选择"知道了"关闭界面。
+    </div>
+    <div class="splash-divider"></div>
+    <div class="splash-update-title">📌 本次更新内容</div>
+    <div class="splash-text splash-update-text">
+      • 新增「挑战关卡」清单，收录全部45个挑战，按编号顺序排列，并标注红/黄/白三档优先级<br>
+      • 新增「导出进度」「导入进度」功能，可将勾选记录导出为文件备份，更换设备或清除缓存前建议先导出保存
     </div>
     <button class="splash-btn" onclick="window._closeSplash()">知道了</button>
   </div>
@@ -436,6 +490,7 @@
       <div class="tabs">
         <button class="tab-btn active" id="tab-normal" onclick="switchGroup('normal')">普通角色 (表形态)</button>
         <button class="tab-btn" id="tab-tainted" onclick="switchGroup('tainted')">堕化角色 (里形态)</button>
+        <button class="tab-btn" id="tab-challenges" onclick="switchGroup('challenges')">挑战关卡</button>
       </div>
       <div class="filters">
         <button class="filter-btn active" id="filter-all" onclick="setFilter('all')">全部</button>
@@ -446,12 +501,18 @@
     <div class="legend">
       <div class="legend-item"><div class="legend-dot" style="background-color: var(--priority-border);"></div><span>🔴 优先解锁 (始终在上)</span></div>
       <div class="legend-item"><div class="legend-dot" style="background-color: var(--normal-border);"></div><span>🟡 推荐解锁</span></div>
+      <div class="legend-item"><div class="legend-dot" style="background-color: var(--low-border);"></div><span>⚪ 普通</span></div>
     </div>
   </div>
 
   <div id="cardsContainer"></div>
 
   <footer>
+    <div class="io-row">
+      <button class="io-btn" onclick="exportProgress()">💾 导出进度</button>
+      <button class="io-btn" onclick="document.getElementById('importFileInput').click()">📂 导入进度</button>
+      <input type="file" id="importFileInput" accept="application/json,.json" style="display:none" onchange="importProgress(event)">
+    </div>
     <button class="reset-btn" onclick="clearAllProgress()">⚠️ 清空当前分组的所有勾选进度</button>
   </footer>
 </div>
@@ -808,12 +869,74 @@
             { "condition": "困难贪婪", "unlock": "太阳与月亮卡牌", "priority": false, "id": "taint_16_3" }
           ]
         }
+      ],
+      "challenges": [
+        {
+          "character": "基础挑战 (1 - 19)",
+          "items": [
+            { "condition": "1. 漆黑一片", "unlock": "冰雹符文", "priority": "low", "id": "chal_1" },
+            { "condition": "2. 格调高雅", "unlock": "收获符文", "priority": "high", "id": "chal_2" },
+            { "condition": "3. 头部创伤", "unlock": "马骑符文", "priority": "high", "id": "chal_3" },
+            { "condition": "4. 黑暗降临", "unlock": "朝夕符文", "priority": "high", "id": "chal_4" },
+            { "condition": "5. 坦克", "unlock": "诸神符文", "priority": "high", "id": "chal_5" },
+            { "condition": "6. 太阳系", "unlock": "签筒符文", "priority": "high", "id": "chal_6" },
+            { "condition": "7. 自杀之王", "unlock": "自杀之王", "priority": "low", "id": "chal_7" },
+            { "condition": "8. 好奇害死猫", "unlock": "保护符文", "priority": "high", "id": "chal_8" },
+            { "condition": "9. 拆迁办", "unlock": "混沌卡", "priority": "mid", "id": "chal_9" },
+            { "condition": "10. 诅咒!", "unlock": "信用卡", "priority": "high", "id": "chal_10" },
+            { "condition": "11. 玻璃大炮", "unlock": "规则卡", "priority": "low", "id": "chal_11" },
+            { "condition": "12. 当生活充满酸意", "unlock": "反人类卡", "priority": "mid", "id": "chal_12" },
+            { "condition": "13. 豆子！", "unlock": "焦灼硬币", "priority": "low", "id": "chal_13" },
+            { "condition": "14. 尽在卡牌中", "unlock": "超级食肉男孩死忠粉", "priority": "mid", "id": "chal_14" },
+            { "condition": "15. 慢吞吞", "unlock": "被吞下的硬币", "priority": "high", "id": "chal_15" },
+            { "condition": "16. 技术宅", "unlock": "机器宝宝2.0", "priority": "low", "id": "chal_16" },
+            { "condition": "17. 吐豆人", "unlock": "死神之触", "priority": "high", "id": "chal_17" },
+            { "condition": "18. 宿主", "unlock": "科技0.5", "priority": "mid", "id": "chal_18" },
+            { "condition": "19. 顾家男人 The Family Man", "unlock": "史诗胎儿博士", "priority": "low", "id": "chal_19" }
+          ]
+        },
+        {
+          "character": "进阶挑战 (20 - 35)",
+          "items": [
+            { "condition": "20. 返璞归真", "unlock": "桦木符文", "priority": "low", "id": "chal_20" },
+            { "condition": "21. 超超超超超大层", "unlock": "金心", "priority": "mid", "id": "chal_21" },
+            { "condition": "22. 快马加鞭！", "unlock": "免费保释卡", "priority": "high", "id": "chal_22" },
+            { "condition": "23. 蓝色炸弹人", "unlock": "金炸弹", "priority": "high", "id": "chal_23" },
+            { "condition": "24. 充钱游戏", "unlock": "止痛药！+ 上瘾！", "priority": "mid", "id": "chal_24" },
+            { "condition": "25. 没心没肺", "unlock": "放-松+ ？？？药丸", "priority": "low", "id": "chal_25" },
+            { "condition": "26. 以撒传说!", "unlock": "筹码", "priority": "low", "id": "chal_26" },
+            { "condition": "27. 脑子!", "unlock": "饰钉定位器 ", "priority": "low", "id": "chal_27" },
+            { "condition": "28. 彩虹之日!", "unlock": "八面骰", "priority": "high", "id": "chal_28" },
+            { "condition": "29. 俄南连击", "unlock": "肾结石", "priority": "low", "id": "chal_29" },
+            { "condition": "30. 守护者", "unlock": "空白符文", "priority": "mid", "id": "chal_30" },
+            { "condition": "31. 本末倒置", "unlock": "拉撒路初始携带贫血", "priority": "low", "id": "chal_31" },
+            { "condition": "32. 愚人节", "unlock": "抹大拉初始携带体力回满药丸", "priority": "high", "id": "chal_32" },
+            { "condition": "33. 宝可萌", "unlock": "充能钥匙", "priority": "mid", "id": "chal_33" },
+            { "condition": "34. 究极困难", "unlock": "参孙初始携带小孩的心脏", "priority": "low", "id": "chal_34" },
+            { "condition": "35. 乒乓", "unlock": "贪婪的胃袋", "priority": "low", "id": "chal_35" }
+          ]
+        },
+        {
+          "character": "忏悔新增挑战 (36 - 45)",
+          "items": [
+            { "condition": "36. 掏粪男孩", "unlock": "龌龊之心", "priority": "low", "id": "chal_36" },
+            { "condition": "37. 血腥玛丽 Bloody Mary", "unlock": "巴风特之印", "priority": "high", "id": "chal_37" },
+            { "condition": "38. 圣火洗礼", "unlock": "炼狱恶鬼", "priority": "low", "id": "chal_38" },
+            { "condition": "39. 以撒织梦岛", "unlock": "英灵剑", "priority": "mid", "id": "chal_39" },
+            { "condition": "40. 重影幻视", "unlock": "碎掉的眼镜", "priority": "low", "id": "chal_40" },
+            { "condition": "41. 异食游戏", "unlock": "冰块", "priority": "low", "id": "chal_41" },
+            { "condition": "42. 烫手山芋", "unlock": "战车？卡牌", "priority": "low", "id": "chal_42" },
+            { "condition": "43. 大量过牌！", "unlock": "正义？卡牌", "priority": "mid", "id": "chal_43" },
+            { "condition": "44. 赤键救赎 Red Redemption", "unlock": "隐士？卡牌", "priority": "mid", "id": "chal_44" },
+            { "condition": "45. 删了这个", "unlock": "节制？卡牌", "priority": "low", "id": "chal_45" }
+          ]
+        }
       ]
     };
 
     // ---------- 状态 ----------
     const STORAGE_KEY = "isaac_repentance_v3_";
-    const SPLASH_KEY = "isaac_splash_shown"; // 新增：独立的开屏标记键名
+    const SPLASH_KEY = "isaac_splash_shown_v2"; // 独立的开屏标记键名（v2：含挑战关卡/导入导出更新说明，老用户会再看一次）
     let currentGroup = 'normal';
     let currentFilter = 'all';
     let savedProgress = {};
@@ -834,14 +957,33 @@
       return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
     }
 
-    /** 返回当前角色过滤后并按 priority 降序排列的条目 */
+    /** 返回当前角色过滤后的条目；普通/堕化角色按 priority 置顶排序，挑战关卡严格保持编号顺序 */
     function getDisplayedItems(charData) {
-      return charData.items.filter(item => {
+      const filtered = charData.items.filter(item => {
         const checked = !!savedProgress[item.id];
         if (currentFilter === 'active' && checked) return false;
-        if (currentFilter === 'priority' && !item.priority) return false;
+        if (currentFilter === 'priority' && !isHighPriority(item)) return false;
         return true;
-      }).sort((a, b) => (b.priority ? 1 : 0) - (a.priority ? 1 : 0));
+      });
+      if (currentGroup === 'challenges') return filtered; // 挑战关卡不置顶排序，严格按 1-45 顺序显示
+      return filtered.sort((a, b) => (b.priority ? 1 : 0) - (a.priority ? 1 : 0));
+    }
+
+    /** 兼容两种优先级取值：normal/tainted 用布尔值，challenges 用 'high'/'mid'/'low' 三档字符串 */
+    function isHighPriority(item) {
+      return item.priority === true || item.priority === 'high';
+    }
+
+    function getRowClass(item) {
+      if (item.priority === true || item.priority === 'high') return 'priority-row';
+      if (item.priority === 'low') return 'low-row';
+      return 'normal-row'; // false 或 'mid'
+    }
+
+    function getTagHtml(item) {
+      if (item.priority === true || item.priority === 'high') return '<span class="tag tag-priority">优先</span>';
+      if (item.priority === 'low') return '<span class="tag tag-low">普通</span>';
+      return '<span class="tag tag-recommend">推荐</span>'; // false 或 'mid'
     }
 
     // ---------- 新增：开屏显示与关闭逻辑 ----------
@@ -888,11 +1030,9 @@
           const isChecked = !!savedProgress[item.id];
           if (isChecked) charCompleted++;
 
-          const rowClass = item.priority ? 'priority-row' : 'normal-row';
+          const rowClass = getRowClass(item);
           const checkedClass = isChecked ? 'checked-row' : '';
-          const tagHtml = item.priority
-            ? '<span class="tag tag-priority">优先</span>'
-            : '<span class="tag tag-recommend">推荐</span>';
+          const tagHtml = getTagHtml(item);
 
           rowsHtml += `
             <div class="item-row ${rowClass} ${checkedClass}" onclick="window._toggleItem('${item.id}', this)">
@@ -993,8 +1133,15 @@
       currentGroup = groupKey;
       document.getElementById('tab-normal').classList.toggle('active', groupKey === 'normal');
       document.getElementById('tab-tainted').classList.toggle('active', groupKey === 'tainted');
-      document.getElementById('groupProgressLabel').textContent =
-        groupKey === 'normal' ? '总完成进度 (普通角色)' : '总完成进度 (堕化角色)';
+      document.getElementById('tab-challenges').classList.toggle('active', groupKey === 'challenges');
+
+      const labelMap = {
+        'normal': '总完成进度 (普通角色)',
+        'tainted': '总完成进度 (堕化角色)',
+        'challenges': '总完成进度 (挑战关卡)'
+      };
+      document.getElementById('groupProgressLabel').textContent = labelMap[groupKey];
+
       renderList();
     };
 
@@ -1006,8 +1153,59 @@
       renderList();
     };
 
+    // 导出进度为 JSON 文件
+    window.exportProgress = function() {
+      const payload = {
+        app: "isaac_repentance_checklist",
+        exportedAt: new Date().toISOString(),
+        progress: savedProgress
+      };
+      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      const dateStr = new Date().toISOString().slice(0, 10);
+      a.href = url;
+      a.download = `isaac_progress_${dateStr}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    };
+
+    // 从 JSON 文件导入进度（整体覆盖当前进度）
+    window.importProgress = function(event) {
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const data = JSON.parse(e.target.result);
+          const incoming = data && typeof data === 'object' && data.progress ? data.progress : data;
+          if (!incoming || typeof incoming !== 'object') throw new Error('格式不对');
+          if (!confirm('导入将覆盖当前所有勾选进度，确认继续吗？')) {
+            event.target.value = '';
+            return;
+          }
+          savedProgress = incoming;
+          saveProgress();
+          renderList();
+          alert('导入成功！');
+        } catch (err) {
+          alert('导入失败：文件内容不是有效的进度文件。');
+        } finally {
+          event.target.value = '';
+        }
+      };
+      reader.readAsText(file);
+    };
+
     window.clearAllProgress = function() {
-      const label = currentGroup === 'normal' ? '普通角色 (表形态)' : '堕化角色 (里形态)';
+      const clearLabelMap = {
+        'normal': '普通角色 (表形态)',
+        'tainted': '堕化角色 (里形态)',
+        'challenges': '挑战关卡'
+      };
+      const label = clearLabelMap[currentGroup];
       if (confirm(`确认重置【${label}】的全部勾选进度吗？此操作不可撤销。`)) {
         const chars = database[currentGroup];
         chars.forEach(c => c.items.forEach(item => delete savedProgress[item.id]));
